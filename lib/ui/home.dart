@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_messages_clone/models/message.dart';
+import 'package:flutter_messages_clone/ui/utility/mockdata.dart';
 import 'utility/HexColor.dart';
 import 'OptionMenu.dart';
 
@@ -18,95 +19,31 @@ class _HomeState extends State<Home> {
   double _width = 56.0;
   bool isExtended = false;
   double appBarElevation = 0;
+  bool isLoading = false;
 
   @override
   void initState() {
-    createSomePredefinedColors();
+    // createSomePredefinedColors();
     createDummyData();
     super.initState();
   }
 
   // Predefined colors for random selection
-  void createSomePredefinedColors() {
-    myCustomMaterialColors.add(Colors.yellow);
-    myCustomMaterialColors.add(Colors.orange);
-    myCustomMaterialColors.add(Colors.purple);
-    myCustomMaterialColors.add(Colors.pink);
-    myCustomMaterialColors.add(Colors.blue);
-  }
-
   // Dummy Messages
-  void createDummyData() {
-    messages.add(Message(
-        from: "Tejas Trivedi",
-        message: "Hey,wassup..!!",
-        isRead: false,
-        isInContactList: true,
-        backgroundColor: myCustomMaterialColors[
-            random.nextInt(myCustomMaterialColors.length)]));
-    messages.add(Message(
-        from: "Smit Shah",
-        message: "Sorry,was busy",
-        isRead: false,
-        isInContactList: true,
-        backgroundColor: myCustomMaterialColors[
-            random.nextInt(myCustomMaterialColors.length)]));
-    messages.add(Message(
-        from: "Mom",
-        message: "Where are you?",
-        isRead: false,
-        isInContactList: true,
-        backgroundColor: myCustomMaterialColors[
-            random.nextInt(myCustomMaterialColors.length)]));
-    messages.add(Message(
-        from: "963808326",
-        message: "Got it",
-        isRead: true,
-        isInContactList: false,
-        backgroundColor: myCustomMaterialColors[
-            random.nextInt(myCustomMaterialColors.length)]));
-    messages.add(Message(
-        from: "Pranay",
-        message: "I'll be there",
-        isRead: true,
-        isInContactList: true,
-        backgroundColor: myCustomMaterialColors[
-            random.nextInt(myCustomMaterialColors.length)]));
-    messages.add(Message(
-        from: "7854862541",
-        message: "2 Missed call",
-        isRead: true,
-        isInContactList: false,
-        backgroundColor: myCustomMaterialColors[
-            random.nextInt(myCustomMaterialColors.length)]));
-    messages.add(Message(
-        from: "Karan Sheth",
-        message: "Thank you so much ::)",
-        isRead: true,
-        isInContactList: true,
-        backgroundColor: myCustomMaterialColors[
-            random.nextInt(myCustomMaterialColors.length)]));
-    messages.add(Message(
-        from: "Dad",
-        message: "Call me later",
-        isRead: true,
-        isInContactList: true,
-        backgroundColor: myCustomMaterialColors[
-            random.nextInt(myCustomMaterialColors.length)]));
-    messages.add(Message(
-        from: "Barabarbaaz",
-        message: "Got new earphones..",
-        isRead: false,
-        isInContactList: true,
-        backgroundColor: myCustomMaterialColors[
-            random.nextInt(myCustomMaterialColors.length)]));
-    messages.add(Message(
-        from: "8779296718",
-        message: "Where were u? Tried calling u..",
-        isRead: true,
-        isInContactList: false,
-        backgroundColor: myCustomMaterialColors[
-            random.nextInt(myCustomMaterialColors.length)]));
+  void createDummyData() async {
+    setState(() {
+      isLoading = true;
+      messages = [];
+    });
+    await loadData().then((value) {
+      value.forEach((element) {
+        messages.add(element);
+      });
+    });
+    print('Loaded all messages');
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -115,80 +52,34 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text('Messages',
             style: TextStyle(
-              letterSpacing: -1,
-              color: Colors.grey[800],
-            )),
+                letterSpacing: -0.5,
+                color: Colors.grey[800],
+                fontFamily: 'Roboto')),
         elevation: appBarElevation,
         centerTitle: true,
         actions: <Widget>[
           Container(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Icon(
-                Icons.search,
-                color: Colors.grey[800],
-              )),
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Icon(
+              Icons.search,
+              color: Colors.grey[800],
+            ),
+          ),
           Container(
             child: OptionMenu(),
           )
         ],
+        leading: IconButton(
+          icon: Icon(Icons.refresh),
+          onPressed: createDummyData,
+        ),
       ),
-      body: Container(
-          color: Colors.white,
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (scrollNotification) {
-              if (scrollNotification is UserScrollNotification) {
-                switch (scrollNotification.direction) {
-                  case ScrollDirection.reverse:
-                    _extendFab(true);
-                    break;
-                  case ScrollDirection.forward:
-                    _extendFab(false);
-                    break;
-                  case ScrollDirection.idle:
-                    break;
-                }
-              }
-            },
-            child: ListView.builder(
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: messages[index].backgroundColor.withOpacity(0.3),
-                      radius: 23,
-                      child: messages[index].isInContactList
-                          ? Text(
-                              '${messages[index].from.substring(0, 1)}',
-                              style: TextStyle(
-                                  fontSize: 22,
-                                  color:
-                                      messages[index].backgroundColor.shade800),
-                            )
-                          : Icon(
-                              Icons.person,
-                              size: 30,
-                              color: messages[index].backgroundColor.shade800,
-                            ),
-                    ),
-                    title: Text(
-                      '${messages[index].from}',
-                      style: TextStyle(
-                          fontWeight: messages[index].isRead
-                              ? FontWeight.normal
-                              : FontWeight.bold,
-                          color: messages[index].isRead ? null : Colors.black),
-                    ),
-                    subtitle: Text(
-                      '${messages[index].message}',
-                      style: TextStyle(
-                          fontWeight: messages[index].isRead
-                              ? FontWeight.normal
-                              : FontWeight.bold,
-                          color: messages[index].isRead ? null : Colors.black),
-                    ),
-                  );
-                }),
-          )),
+      body: Stack(
+        children: [
+          showMessages(),
+          showCircularProgress(),
+        ],
+      ),
       floatingActionButton: AnimatedContainer(
         height: 56,
         width: _width,
@@ -228,6 +119,154 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget showMessages() {
+    return Container(
+      color: Colors.white,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (scrollNotification) {
+          if (scrollNotification is UserScrollNotification) {
+            switch (scrollNotification.direction) {
+              case ScrollDirection.reverse:
+                _extendFab(true);
+                break;
+              case ScrollDirection.forward:
+                _extendFab(false);
+                break;
+              case ScrollDirection.idle:
+                break;
+            }
+          }
+        },
+        child: ListView.builder(
+            itemCount: messages.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                leading: Hero(
+                  tag: "$index",
+                  child: CircleAvatar(
+                    backgroundColor:
+                        messages[index].backgroundColor.withOpacity(0.3),
+                    radius: 23,
+                    child: messages[index].isInContactList
+                        ? Text(
+                            '${messages[index].from.substring(0, 1)}',
+                            style: TextStyle(
+                              fontSize: 22,
+                              color: messages[index].backgroundColor.shade800,
+                            ),
+                          )
+                        : Icon(
+                            Icons.person,
+                            size: 30,
+                            color: messages[index].backgroundColor.shade800,
+                          ),
+                  ),
+                ),
+                title: Text(
+                  '${messages[index].from}',
+                  style: TextStyle(
+                    fontWeight: messages[index].isRead
+                        ? FontWeight.normal
+                        : FontWeight.bold,
+                    color: messages[index].isRead ? null : Colors.black,
+                  ),
+                ),
+                subtitle: Text(
+                  '${messages[index].message}',
+                  style: TextStyle(
+                    fontWeight: messages[index].isRead
+                        ? FontWeight.normal
+                        : FontWeight.bold,
+                    color: messages[index].isRead ? null : Colors.black,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(context).push(
+                    new MaterialPageRoute(
+                      builder: (context) {
+                        return Scaffold(
+                          body: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Hero(
+                                  tag: "$index",
+                                  child: CircleAvatar(
+                                    backgroundColor: messages[index]
+                                        .backgroundColor
+                                        .withOpacity(0.3),
+                                    radius: 40,
+                                    child: messages[index].isInContactList
+                                        ? Text(
+                                            '${messages[index].from.substring(0, 1)}',
+                                            style: TextStyle(
+                                              fontSize: 22,
+                                              color: messages[index]
+                                                  .backgroundColor
+                                                  .shade800,
+                                            ),
+                                          )
+                                        : Icon(
+                                            Icons.person,
+                                            size: 30,
+                                            color: messages[index]
+                                                .backgroundColor
+                                                .shade800,
+                                          ),
+                                  ),
+                                ),
+                                Padding(
+                                  child: Text(
+                                    messages[index].message,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: messages[index].isRead
+                                          ? FontWeight.normal
+                                          : FontWeight.bold,
+                                    ),
+                                  ),
+                                  padding: EdgeInsets.all(10),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: IconButton(
+                                    color: Theme.of(context).primaryColorDark,
+                                    tooltip: 'Go back',
+                                    icon: Icon(Icons.arrow_back),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              );
+            }),
+      ),
+    );
+  }
+
+  Widget showCircularProgress() {
+    if (isLoading) {
+      return Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+        ),
+      );
+    }
+    return Container(
+      height: 0.0,
+      width: 0.0,
+    );
+  }
+
   _extendFab(bool isExtend) {
     setState(() {
       isExtended = isExtend;
@@ -236,10 +275,6 @@ class _HomeState extends State<Home> {
     });
   }
 }
-
-
-
-
 
 //TODO library match coding standard with pedro
 //Different option for color

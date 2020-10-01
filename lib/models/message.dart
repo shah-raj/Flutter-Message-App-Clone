@@ -7,5 +7,14 @@ class Message {
   bool isInContactList;
   MaterialColor backgroundColor;
 
-  Message({this.from,this.message,this.isRead,this.isInContactList,this.backgroundColor});
+  Message({
+    this.from,
+    this.message,
+    this.isRead,
+    this.isInContactList,
+    this.backgroundColor,
+  });
+  String get getFrom => this.from;
+  String get getMessge => this.message;
+  // bool get getRead => this.isRead;
 }
